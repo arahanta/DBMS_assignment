@@ -1,0 +1,206 @@
+
+create database db_Kamdar
+USE db_Kamdar;
+
+
+CREATE TABLE employee(
+employee_name VARCHAR(255) PRIMARY KEy,
+street VARCHAR(255),
+city VARCHAR(255)
+);
+
+ 
+
+CREATE TABLE works(
+employee_name VARCHAR(255) PRIMARY KEY,
+company_name VARCHAR(255),
+salary VARCHAR(255),
+FOREIGN KEY (employee_name) REFERENCES employee(employee_name)
+);
+
+ 
+
+CREATE TABLE company(
+company_name VARCHAR(255) PRiMARY KEy,
+city VARCHAR(255)
+
+);
+
+ 
+
+CREATE TABLE manages(
+employee_name VARCHAR(255) PRiMARY KEy,
+manager_name VARCHAR(255),
+  FOREIGN KEY (employee_name) REFERENCES employee(employee_name)
+);
+
+ 
+
+INSERT INTO employee(employee_name,street,city)
+VALUES
+("ram","srijananagar","thapathali"),
+("mishan","rampath","jamal"),
+("jones","suncity road","kadhaghari"),
+("arahanta","bajaicha toll","inaruwa"),
+("bikrant","samakhusi road","tokha"),
+("cameron","samakhusi road","tokha"),
+("biswas","lamakhusi road","rokha"),
+("shubham","lumbini road","dokha")
+drop table employee
+
+
+ 
+
+INSERT INTO works(employee_name,company_name,salary)
+VALUES
+("ram","microsoft",50000),
+("mishan","First Bank Corportion",60000),
+("jones","twitter",60000),
+("arahanta","spacex",100000),
+("bikrant","First Bank ",70000),
+('Shubham', 'Small Bank Corporation', 5000),
+('Biswas', 'Small Bank Corporation', 40000)
+drop table works
+select * from works
+
+ 
+
+INSERT INTO company(company_name,city)
+VALUES
+("microsoft","thapathali"),
+("First Bank Corportion","jamal"),
+("twitter","kadhaghari"),
+("spacex","inaruwa"),
+("First Bank","tokha"),
+("small bank corportion","jamal")
+drop table company
+
+ 
+
+INSERT INTO manages(employee_name,manager_name)
+VALUES
+("ram","alex"),
+("mishan","warner"),
+("ayush","smith"),
+("arahanta","stokes"),
+("bikrant","cameron"),
+("shubham","Root"),
+("biswas","gayle")
+drop table manages
+
+
+ 
+
+SELECT * FROM company; 
+SELECT * FROM employee; 
+----------------------------- Q2.a-----------------------------------------------------------------------------------
+--method1--
+SELECT works.employee_name FROM works
+where works.company_name="First Bank Corportion"
+--method2--
+SELECT employee_name FROM employee natural join company
+where company_name="First Bank Corportion"
+
+----------------------------- Q2.b-----------------------------------------------------------------------------------
+select employee_name, city from employee where employee_name IN
+(select employee_name from works WHERE company_name = 'First Bank Corportion');
+--method2--
+SELECT employee_name,city FROM employee natural join company
+where company_name="First Bank Corportion"
+----------------------------- Q2.c----------------------------------------------------------------------------------
+--method1--
+select * from employee where employee_name IN
+(select employee_name from works WHERE company_name = 'First Bank Corportion' and salary>10000);
+--method2--
+SELECT employee_name,street,city FROM employee natural join works
+where company_name="First Bank Corportion" and salary>10000
+----------------------------- Q2.d----------------------------------------------------------------------------------
+SELECT employee_name FROM employee e
+WHERE e.city = (SELECT city FROM company c WHERE c.company_name = 
+(SELECT company_name FROM works w WHERE w.employee_name = e.employee_name));
+--method2--
+select employee_name from works natural join company NATURAL join employee
+where employee.city= company.city;
+----------------------------- Q2.e----------------------------------------------------------------------------------
+--method 1---
+SELECT e.employee_name FROM employee e, manages m, employee mgr
+WHERE e.employee_name = m.employee_name
+AND m.manager_name = mgr.employee_name
+AND e.city = mgr.city AND e.street = mgr.street;
+
+--method2--
+SELECT e.employee_name FROM employee e
+INNER JOIN manages m ON e.employee_name = m.employee_name
+INNER JOIN employee mgr ON  m.manager_name = mgr.employee_name
+WHERE e.city = mgr.city AND e.street = mgr.street;
+
+
+----------------------------- Q2.f----------------------------------------------------------------------------------
+--method1--
+SELECT employee_name from Tbl_works WHERE company_name != 'First Bank Corporation';
+----------------------------- Q2.g----------------------------------------------------------------------------------
+--method1--
+SELECT @maxsal := Max(salary) 
+FROM works Where company_name = 'Small Bank Corporation';
+SELECT employee_name e from works where salary > @maxsal;
+--method2--
+select employee_name from works where salary >
+(select max(salary) from works natural join company  Where company_name = 'Small Bank Corporation');
+----------------------------- Q2.h----------------------------------------------------------------------------------
+--method1--
+Select company_name from company 
+WHERE city IN(SELECT city from company where company_name = 'Small Bank Corporation');
+--method2--
+select t2.company_name from company t1 join company t2 on t1.city = t2.city 
+where t1.company_name = 'Small Bank Corporation' ;
+
+----------------------------- Q2.i----------------------------------------------------------------------------------
+SELECT employee_name from works 
+where salary > (select avg(salary) from works w2 where w2.company_name = works.company_name);
+
+
+---------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------
+                              ----------------------QN no 3-------------------------------
+                              
+----------------------------- Q3.a----------------------------------------------------------------------------------
+select employee_name, city from employee;
+ 
+update employee 
+SET city = 'Newtown' where employee_name = 'Jones';
+----------------------------- Q3.b----------------------------------------------------------------------------------
+SELECT * from works;
+
+update works
+set salary = salary *1.1 
+where company_name = 'First Bank Corporation';
+----------------------------- Q3.c----------------------------------------------------------------------------------
+UPDATE works
+SET salary = salary * 1.1
+WHERE employee_name IN (SELECT employee_name FROM manages
+ WHERE manager_name IN (SELECT employee_name FROM works WHERE company_name = 'First Bank Corporation'));
+ ----------------------------- Q3.d----------------------------------------------------------------------------------
+UPDATE works
+SET salary =
+    CASE
+        WHEN salary < 100000 THEN salary * 1.1
+        ELSE salary * 1.03
+    END
+WHERE works.employee_name IN (
+    SELECT manages.employee_name
+    FROM manages
+    WHERE manages.manager_name = works.employee_name AND works.company_name = 'First Bank Corporation'
+);
+ ----------------------------- Q3.e----------------------------------------------------------------------------------
+DELETE FROM works
+WHERE company_name = 'Small Bank Corporation';
+
+
+
+
+
+
+
+
+ 
+
